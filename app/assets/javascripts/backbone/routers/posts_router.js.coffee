@@ -1,8 +1,7 @@
 class Dummy2.Routers.PostsRouter extends Backbone.Router
 
   initialize: (options) ->
-    @posts = new Dummy2.Collections.PostsCollection()
-    @posts.reset options.posts
+    @posts = new Dummy2.Collections.PostsCollection(options.posts)
 
   routes:
     "index"       : "index"
@@ -12,7 +11,8 @@ class Dummy2.Routers.PostsRouter extends Backbone.Router
     ".*"          : "index"
 
   index: ->
-    @view = new Dummy2.Views.PostsIndexView({collection: @posts})
+    @view = new Dummy2.Views.PostsIndexView({ collection: @posts })
+    @paginatorView = new Dummy2.Views.PaginatedView({ collection : @posts })
 
   newPost: ->
     @view = new Dummy2.Views.PostsNewView({collection: @posts})

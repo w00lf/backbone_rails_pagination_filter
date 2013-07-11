@@ -10,47 +10,33 @@ class Dummy2.Models.Post extends Backbone.Model
     return (this.sync || Backbone.sync).call @, null, @, url: "#{@url()}/get_foo"
 
 
-class Dummy2.Collections.PostsCollection extends Backbone.Paginator.requestPager
+class Dummy2.Collections.PostsCollection extends Backbone.Collection
   model: Dummy2.Models.Post
+
   url: '/posts'
 
-  paginator_core: 
-    type: 'GET'
-    dataType: 'json' 
-    url: '/posts'
+  query: ''
 
-  paginator_ui: 
-    firstPage: 1
-    currentPage: 1
-    perPage: 3
-    totalPages: 10
+  per_page: 5
 
-  server_api: 
-    'per_page': ->
-      @perPage 
+  page_active: 1
 
-    'page':  -> 
-      @currentPage
+  order: ''
 
-    'sort':  -> 
-      if(this.sortField == undefined)
-        return 'created'
-      @sortField
-    'callback': '?'
-    'format': 'json'
-    
-  parse: (response) -> 
-    @totalRecords = @totalPages * @perPage;
-    response.data;
+  initialize: (collection) ->
+    @total_entries = collection.length
 
-  search: (word) ->
-    self = @
-    (this.sync || Backbone.sync).call @, 'post', @, url: "#{@url}/search?word=#{word}", success: (data) ->
-      console.log('rerender')
-      self.reset(data)
-      @collection.trigger('reset')
+  fetch_w_params: (reload) ->
+    if(reload) 
+      page = 1
+    @fetch({ data: { 
+                    order: @order,
+                    query: @query,
+                    per_page: @per_page,
+                    page: @page_active
+                    } })
 
-  order: (order) ->
-    self = @
-    @fetch({ data: $.param({ order: order }) })
+  parse: (response) ->
+    @total_entries = response.total_entries
+    response.results
 

@@ -9,42 +9,31 @@ class Dummy2.Views.PostsIndexView extends Backbone.View
     "change #order select" : "reorder_posts"
 
   initialize: ->
-    console.log(@collection)
     @render()
-    @collection.on('reset', @addAll, @);
-    @collection.fetch
-      success: ->
-        tags.pager()
-      silent:true
+    @collection.on('reset', @rerender, @);
 
   addAll: ->
+    @$el.find('tbody tr').remove()
     @collection.forEach(@addOne, @)
 
   addOne: (model) ->
     @view = new Dummy2.Views.PostView({model: model})
     @$el.find('tbody').append @view.render().el
 
-  pagination: ->
-    view = new Dummy2.Views.PaginatedView({ collection : @collection })
-
   reorder_posts: (e) ->
     order = $(e.target).val()
-    @collection.order(order)
-    @$el.find('tbody tr').remove()
-    @addAll()
-
-  rerenderAll: ->
-    @$el.find('tbody tr').remove()
-    @addAll()
+    @collection.order = order
+    @collection.fetch_w_params(true)
   
   search_posts: (e) ->
     word = $(e.target).val()
-    @collection.search(word)
+    @collection.query = word
+    @collection.fetch_w_params(true)
+
+  rerender: ->
+    @addAll()
 
   render: ->
-    console.log('rerender posts')
-    console.log(@collection)
     @$el.html @template()
     @addAll()
-    @pagination()
     @

@@ -3,11 +3,11 @@ class PostsController < ApplicationController
   # GET /posts.json
   def index
     order = params[:order] || 'title'
-    @posts = Post.order(order).limit(params[:per_page]).offset(params[:page]).all
+    @posts = Post.order(order).search_in_posts(params[:query]).paginate(:per_page => params[:per_page], :page => params[:page])
 
     respond_to do |format|
       format.html # index.html.erb
-      format.json { render json: @posts }
+      format.json { render(json: { total_entries: @posts.total_entries, results: @posts }) }
     end
   end
 
@@ -36,15 +36,6 @@ class PostsController < ApplicationController
   # GET /posts/1/edit
   def edit
     @post = Post.find(params[:id])
-  end
-
-  def search
-    @post = Post.search_in_posts(params[:word])
-
-    respond_to do |format|
-      format.html # new.html.erb
-      format.json { render json: @post }
-    end
   end
 
   # POST /posts
